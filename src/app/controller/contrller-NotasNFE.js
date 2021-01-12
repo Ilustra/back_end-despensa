@@ -19,7 +19,7 @@ router.get('/:userId', async (req, res) => {
 router.post('/month', async (req, res) => {
     try {
         const {userId, start, end} = req.body
-  
+        console.log(req.body)
         const startTime = new Date(start)
         const endTime=new Date(end)
     
@@ -27,6 +27,7 @@ router.post('/month', async (req, res) => {
             createdAt:{$gte: startTime.getTime(),  
             $lte: endTime.getTime()}
         })
+
         return res.send(notaMonth)
     } catch (error) {
         console.log(error)
