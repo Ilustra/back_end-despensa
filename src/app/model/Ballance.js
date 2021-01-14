@@ -8,6 +8,22 @@ const SchemaBallance = new mongoose.Schema({
     index: true,
    
   },
+  total:{
+    type: Number,
+    default: 0
+  },
+  totalTributos:{
+    type: Number,
+    default: 0
+  },
+  qtdNotas:{
+    type:Number,
+    default: 0
+  },
+  qtdItens:{
+    type: Number,
+    default: 0
+  },
   months:[
     {
       month:{

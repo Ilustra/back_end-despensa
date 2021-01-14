@@ -24,8 +24,11 @@ router.post('/month', async (req, res) => {
         const endTime=new Date(end)
     
         const notaMonth = await NotaNfe.find({user:userId, 
-            emissao:{$gte: startTime.getTime(),  
-            $lte: endTime.getTime()}
+            emissao:
+            {
+                $gte: startTime,  
+                $lte: endTime
+            }
         })
 
         return res.send(notaMonth)
@@ -135,6 +138,7 @@ router.post('/register', async (req, res) => {
                         data_emissao = t
                     }
                 })
+                console.log('dataemissao', data_emissao)
                 //dataEmisssao 
                 const dia = data_emissao[0] + data_emissao[1]
                 const month= data_emissao[3] + data_emissao[4] -1

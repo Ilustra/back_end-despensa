@@ -17,14 +17,6 @@ router.post('/ballance', async(req, res)=>{
     }
   }
 
-  const {descriptions} = months
-  console.log(months[0].descriptions)
-  await ballance.update({
-    months:[
-      {month: months.month},
-      
-    ]
-  })
   return res.send(ballance)
 })
 

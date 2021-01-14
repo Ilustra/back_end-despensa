@@ -130,21 +130,30 @@ const NotaSchema = new mongoose.Schema({
 })
 NotaSchema.post('save', async function(doc){
   const now = new Date()
-  const ballance = await Ballance.findOne({$and: [{user: doc.user}, {year: now.getFullYear()}]})
+  const dateEmissao = new Date(doc.emissao)
+  console.log('emissao',dateEmissao, 'date emissao', new Date(dateEmissao))
+  const ballance = await Ballance.findOne({$and: [{user: doc.user}, {year: dateEmissao.getFullYear()}]})
+  
   if(!ballance){
     try {
-       await Ballance.create({user: doc.user, year: now.getFullYear(), months: [{month: now.getMonth(), descriptions: {itens: doc.itens, qtdNotas: 1, total: doc.total, tributos: doc.tributos}}]})
+       await Ballance.create({
+         user: doc.user, year: dateEmissao.getFullYear(), 
+         total: doc.total,
+         totalTributos: doc.tributos,
+         qtdNotas: 1,
+         qtdItens: doc.itens,
+         months: [{month: dateEmissao.getMonth(), descriptions: {itens: doc.itens, qtdNotas: 1, total: doc.total, tributos: doc.tributos}}]})
     } catch (error) {
 
     }
   } else{
     const updateMonths = ballance.months.filter(element=>{
-      if(element.month == now.getMonth())
+      if(element.month == dateEmissao.getMonth())
       return element;
     })
     if(!updateMonths.length){
       await ballance.months.push({
-        month: now.getMonth(),
+        month: dateEmissao.getMonth(),
         descriptions: {
           itens: doc.itens,
           qtdNotas: 1,
@@ -152,9 +161,21 @@ NotaSchema.post('save', async function(doc){
           tributos: doc.tributos
         }
       })
+  
+      ballance.qtdItens = doc.itens + ballance.qtdItens
+      ballance.total = doc.total + ballance.total
+      ballance.qtdNotas = ballance.qtdNotas + 1
+      ballance.totalTributos = doc.tributos + ballance.totalTributos
+  
       await ballance.save()
     }else{
-      await ballance.update({months:[{
+      await ballance.update({
+        total: ballance.total + doc.total,
+        totalTributos: ballance.totalTributos + doc.tributos,
+        qtdNotas: ballance.qtdNotas + doc.tributos,
+        qtdItens: ballance.qtdItens + doc.itens,
+    
+        months:[{
         month: updateMonths[0].month,
         descriptions: {
           itens: doc.itens + updateMonths[0].descriptions.itens,
