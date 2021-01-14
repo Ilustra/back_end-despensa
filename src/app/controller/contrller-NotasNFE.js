@@ -10,7 +10,7 @@ router.get('/:userId', async (req, res) => {
     const { userId } = req.params
     let { limit = 2, skip = 1, orderby, sort = 'asc' } = req.query;
     const notas = await NotaNfe.find({user: userId})
-    .sort({createdAt: -1})
+    .sort({emissao: -1})
     .limit(parseInt(limit))
     .skip((parseInt(skip) -1)* limit)
     return res.send(notas)
@@ -24,7 +24,7 @@ router.post('/month', async (req, res) => {
         const endTime=new Date(end)
     
         const notaMonth = await NotaNfe.find({user:userId, 
-            createdAt:{$gte: startTime.getTime(),  
+            emissao:{$gte: startTime.getTime(),  
             $lte: endTime.getTime()}
         })
 
@@ -67,7 +67,63 @@ router.post('/register', async (req, res) => {
                 //
                 const TOTAL_ITEMS = $('span[class=totalNumb]').first().text()
                 const form_pagamento = $('label[class=tx]').first().text();
-                const TOTAL_Nota = $('span[class=totalNumb]').last().text().replace(',', '.')
+                let objectPagamento={
+                    qtdTotalItens: 0 ,
+                    valorTotal: 0 ,
+                    descontos: 0 ,
+                    valorPagar: 0 ,
+                    formaPagamento: {
+                         dinheiro: 0 ,
+                         cartaoDebito: 0 ,
+                         cartaoCredito: 0,
+                    },
+                     tributos: 0 
+                    }
+                    $('#totalNota' ).find('div').each((index, element) =>{
+                        //console.log($(element).text())
+                        $(element).each((index2, element2)=>{
+                            
+                            const auxPagamento = $(element2).text().replace(/\s/g, ' ').trim()
+                            console.log(auxPagamento)
+                            if(auxPagamento.indexOf('Qtd. total de itens:')> -1)
+                            {
+                                objectPagamento.qtdTotalItens=parseInt(auxPagamento.replace('Qtd. total de itens:', '').trim())
+                            }
+                            if(auxPagamento.indexOf('Valor total R$:')> -1)
+                            {
+                                objectPagamento.valorTotal= parseFloat(auxPagamento.replace('Valor total R$:', '').trim().replace(',', '.'))
+                            }
+                            if(auxPagamento.indexOf('Descontos R$:')> -1)
+                            {
+                                objectPagamento.descontos=parseFloat(auxPagamento.replace('Descontos R$:', '').trim().replace(',', '.'))
+                            }
+                            if(auxPagamento.indexOf('Valor a pagar R$:')>-1)
+                            {
+                                objectPagamento.valorPagar=parseFloat(auxPagamento.replace('Valor a pagar R$:', '').trim().replace(',', '.'))
+                            }          
+                            if(auxPagamento.indexOf('Cartão de Crédito')>-1)
+                            {
+                                objectPagamento.formaPagamento.cartaoCredito=parseFloat(auxPagamento.replace('Cartão de Crédito', '').trim().replace(',', '.'))
+                            }
+                            if(auxPagamento.indexOf('Dinheiro')>-1)
+                            {
+                                objectPagamento.formaPagamento.dinheiro =parseFloat(auxPagamento.replace('Dinheiro', '').trim().replace(',', '.'))
+                            }
+                 
+                            if(auxPagamento.indexOf('Cartão de Débito ')>-1)
+                            {
+                                //console.log(auxPagamento.first().text())
+                                objectPagamento.formaPagamento.cartaoDebito =  parseFloat(auxPagamento.replace('Cartão de Débito 2', '').trim().replace(',', '.'))
+                            }
+                            if(auxPagamento.indexOf('Informação dos Tributos Totais Incidentes (Lei Federal 12.741/2012) R$')>-1)
+                            {
+                                objectPagamento.tributos=parseFloat(auxPagamento.replace('Informação dos Tributos Totais Incidentes (Lei Federal 12.741/2012) R$', '').trim().replace(',', '.'))
+                            }
+                        })
+                    
+                    })
+                    console.log(objectPagamento)
+                const TOTAL_Nota = $('span[class="totalNumb txtMax"]').last().text().replace(',', '.')
                 let data_emissao
                 $('#infos').find('div> div> ul > li').each((index, element) => {
                     let string = $(element).text()
@@ -79,6 +135,15 @@ router.post('/register', async (req, res) => {
                         data_emissao = t
                     }
                 })
+                //dataEmisssao 
+                const dia = data_emissao[0] + data_emissao[1]
+                const month= data_emissao[3] + data_emissao[4] -1
+                const ano =  data_emissao[6] + data_emissao[7] + data_emissao[8]+ data_emissao[9]
+                const minute = data_emissao[11] + data_emissao[12]
+                const segund = data_emissao[14] + data_emissao[15]
+                const mili =data_emissao[17] + data_emissao[18]
+                const emissaoDate = new Date(Date.UTC(ano, month, dia, minute, segund, mili))
+                
                 //produtos
                 const produto = [];
                 $('table > tbody > tr ').each((index, element) => {
@@ -105,11 +170,12 @@ router.post('/register', async (req, res) => {
                             'UN': UN,
                             'valor': parseFloat(valor),
                             'total': parseFloat(total),
-                            'emissao': data_emissao,
+                            'emissao': emissaoDate,
                             'empresa': Nome_fantasia
                         })
                 })
-
+         
+           
                 const scrapingNota = {
                     user: userId,
                     nome: Nome_fantasia,
@@ -119,41 +185,45 @@ router.post('/register', async (req, res) => {
                     localidade: localidade,
                     uf: uf,
                     bairro: bairro,
-                    itens: parseInt(TOTAL_ITEMS),
-                    pagamento: form_pagamento,
-                    total: parseFloat(TOTAL_Nota),
-                    emissao: data_emissao,
+                    itens: objectPagamento.qtdTotalItens,
+                    pagamento: objectPagamento.formaPagamento,
+                    tributos: objectPagamento.tributos,
+                    subTotal: objectPagamento.valorTotal,
+                    descontos: objectPagamento.descontos,
+                    total: objectPagamento.valorPagar,
+                    emissao: emissaoDate,
                     produtos: produto,
                     url: url,
                 }
                 try{
-                const user = await User.findById(userId)
-                if (!user)
-                
-                return res.status(400).send('Usuário não existe')
-                const notaFiscal = await NotaNfe.findOne({ url: url })
-
-                if(notaFiscal)
-                return res.status(400).send({ error: 'Essa nota já foi adicionada' })
-
-                const notas = await NotaNfe.create(scrapingNota)
-                return res.send(notas)
-                
-                }catch(e){
-                    return res.status(403).send({ error: 'Não foi possivel carregar sua nota, por favor tente novamente' })
-                }
+                    const user = await User.findById(userId)
+                    if (!user)
+                    
+                    return res.status(400).send('Usuário não existe')
+                    const notaFiscal = await NotaNfe.findOne({ url: url })
+    
+                    if(notaFiscal)
+                    return res.status(400).send({ error: 'Essa nota já foi adicionada' })
+    
+                    const notas = await NotaNfe.create(scrapingNota)
+                    return res.send(notas)
+                    
+                    }catch(e){
+                        console.log('1', e)
+                        return res.status(403).send({ error: 'Não foi possivel carregar sua nota, por favor tente novamente' })
+                    }
             }else{
+                console.log('8', e)
                 return res.status(400).send(e)
             }
 
         })
 
     } catch (e) {
+        console.log('----',e)
         return res.status(400).send(e)
     }
 })
-
-
 
 
 

@@ -16,8 +16,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/login', require('./app/controller/ControllerAuht'));
-app.use('/notas', isAuthorized, require('./app/controller/contrller-NotasNFE'));
-app.use('/user', isAuthorized, require('./app/controller/ControllerUser'));
+app.use('/notas', require('./app/controller/contrller-NotasNFE'));
+app.use('/user', require('./app/controller/ControllerUser'));
 app.use('/cadastro', isAuthorized, require('./app/controller/controller-cadastro'));
 
 app.use(sendValidationErrors);

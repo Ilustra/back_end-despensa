@@ -1,8 +1,32 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../model/User')
+const Ballance = require('../model/Ballance')
 
+router.post('/ballance', async(req, res)=>{
+  
+  const {user, year, months} = req.body
 
+  const ballance = await Ballance.findOne({$and: [{user: user}, {year: year}]})
+  if(!ballance){
+    try {
+      const newBallance = await Ballance.create(req.body)
+      return res.send(newBallance)  
+    } catch (error) {
+      return res.status(400).send(error)
+    }
+  }
+
+  const {descriptions} = months
+  console.log(months[0].descriptions)
+  await ballance.update({
+    months:[
+      {month: months.month},
+      
+    ]
+  })
+  return res.send(ballance)
+})
 
 router.put('/', async (req, res) => {
   try {
@@ -36,23 +60,5 @@ router.get('/:email', async (req, res)=>{
     return res.status(400).send(error)
   }
 })
-/*
-router.get('/consulta/user/:email',  async (req, res)=>{
-  const {email} = req.params
-try{
-  const user = await User.findOne({email: email});
-  if(!user)
-    return res.status(400).send({error:'Usuário não encontrado'})
 
-  user.despensa = undefined
-  user.cpf = undefined
-  user.telefone = undefined
-  user.email = undefined
-  user.ddd = undefined
-    return res.send(user)
-}catch(e){
-  res.status(400).send({error:'Falha ao atualizar'})
-}
-})
-*/
 module.exports = router;

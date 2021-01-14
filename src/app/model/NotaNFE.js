@@ -37,16 +37,40 @@ const NotaSchema = new mongoose.Schema({
     type: Number, 
     require: true,
   },
-  pagamento:{
-    type: String, 
-    require: true,
-  },
+  pagamento:[
+  {
+    dinheiro:{
+      type: Number, 
+      require: true
+    },   
+     cartaoDebito:{
+      type: Number, 
+      require: true
+    },
+    cartaoCredito:{
+      type: Number, 
+      require: true
+    },
+  }  
+  ],
   total:{
     type: Number, 
     require: true,
   },
+  tributos:{
+    type: Number, 
+    require: true,
+  },  
+  descontos:{
+    type: Number, 
+    require: true,
+  },
+  subTotal:{
+    type: Number, 
+    require: true,
+  },
   emissao:{
-    type: String,
+    type: Date,
     require: true,
   },
   produtos:[
@@ -76,7 +100,7 @@ const NotaSchema = new mongoose.Schema({
         require: true
       },
       emissao:{    
-        type: String, 
+        type: Date,
         require: true
       },
       empresa:{    
@@ -105,17 +129,45 @@ const NotaSchema = new mongoose.Schema({
   },
 })
 NotaSchema.post('save', async function(doc){
-  const ballance = await Ballance.findOne({user: doc.user})
-  await ballance.update({
-    itens: ballance.itens + doc.itens,
-    totalNotas: ballance.totalNotas + 1,
-    total: ballance.total + doc.total
-  })
-  /*await Ballance.updateOne({user: doc.user},{
-    itens: ballance.itens + doc.itens,
-    totalNotas: ballance.totalNotas + 1,
-    total: ballance.total + doc.total
-  });*/
+  const now = new Date()
+  const ballance = await Ballance.findOne({$and: [{user: doc.user}, {year: now.getFullYear()}]})
+  if(!ballance){
+    try {
+       await Ballance.create({user: doc.user, year: now.getFullYear(), months: [{month: now.getMonth(), descriptions: {itens: doc.itens, qtdNotas: 1, total: doc.total, tributos: doc.tributos}}]})
+    } catch (error) {
+
+    }
+  } else{
+    const updateMonths = ballance.months.filter(element=>{
+      if(element.month == now.getMonth())
+      return element;
+    })
+    if(!updateMonths.length){
+      await ballance.months.push({
+        month: now.getMonth(),
+        descriptions: {
+          itens: doc.itens,
+          qtdNotas: 1,
+          total: doc.total,
+          tributos: doc.tributos
+        }
+      })
+      await ballance.save()
+    }else{
+      await ballance.update({months:[{
+        month: updateMonths[0].month,
+        descriptions: {
+          itens: doc.itens + updateMonths[0].descriptions.itens,
+          qtdNotas: 1 + updateMonths[0].descriptions.qtdNotas,
+          total: doc.total + updateMonths[0].descriptions.total,
+          tributos: doc.tributos + updateMonths[0].descriptions.tributos
+        }
+      }]})
+    }
+  }
+
+  
+
 })
 const NotaNfe = mongoose.model('NotaNfe', NotaSchema);
 module.exports = NotaNfe;
