@@ -4,15 +4,15 @@ const Cadastro = require('../model/Cadastro')
 
 
 
-router.get('/:_id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const { _id} = req.params
-    const cadastro = await Cadastro.findOne({user: _id});
-
-
+    const { id} = req.params
+    const cadastro = await Cadastro.findOne({user: id});
+    if(!cadastro)
+    return res.status(400).send({error:'Você não possui cadastro, por favor insira seus dados'})
     return res.send(cadastro)
   } catch (e) {
-
+    console.log(e)
     res.status(400).send(e)
   }
 })

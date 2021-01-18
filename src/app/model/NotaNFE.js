@@ -50,6 +50,10 @@ const NotaSchema = new mongoose.Schema({
     cartaoCredito:{
       type: Number, 
       require: true
+    },    
+    outros:{
+      type: Number, 
+      require: true
     },
   }  
   ],
