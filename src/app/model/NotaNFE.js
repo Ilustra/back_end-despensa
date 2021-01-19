@@ -133,7 +133,6 @@ const NotaSchema = new mongoose.Schema({
   },
 })
 NotaSchema.post('save', async function(doc){
-
   const dateEmissao = new Date(doc.emissao) 
   console.log('emissao->',dateEmissao, 'user', doc.user)
   const ballance = await Ballance.findOne({$and: [{user: doc.user}, {year: dateEmissao.getFullYear()}]})

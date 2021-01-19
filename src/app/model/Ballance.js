@@ -3,10 +3,7 @@ const mongoose = require('../../database')
 const SchemaBallance = new mongoose.Schema({
   year:{
     type: Number,
-    require: true,
-    unique: true,
-    index: true,
-   
+    require: true,   
   },
   total:{
     type: Number,

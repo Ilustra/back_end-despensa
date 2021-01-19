@@ -13,11 +13,5 @@ router.post('/', async (req, res)=>{
         return res.status(400).send(error)
     }
 })
-router.get('/', async(req, res)=>{
-    const {year, id} = req.body
-    const ballance = await Ballance.findOne({$and: [{user: id}, {year: year}]})
-    if(ballance)
-     console.log(ballance)
-    return res.send(ballance)
-})
+
 module.exports = router;
