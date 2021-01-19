@@ -133,22 +133,23 @@ const NotaSchema = new mongoose.Schema({
   },
 })
 NotaSchema.post('save', async function(doc){
-  const now = new Date()
-  const dateEmissao = new Date(doc.emissao)
-  console.log('emissao',dateEmissao, 'date emissao', new Date(dateEmissao))
+
+  const dateEmissao = new Date(doc.emissao) 
+  console.log('emissao->',dateEmissao, 'user', doc.user)
   const ballance = await Ballance.findOne({$and: [{user: doc.user}, {year: dateEmissao.getFullYear()}]})
   
   if(!ballance){
     try {
        await Ballance.create({
-         user: doc.user, year: dateEmissao.getFullYear(), 
+         user: doc.user, 
+         year: dateEmissao.getFullYear(), 
          total: doc.total,
          totalTributos: doc.tributos,
          qtdNotas: 1,
          qtdItens: doc.itens,
          months: [{month: dateEmissao.getMonth(), descriptions: {itens: doc.itens, qtdNotas: 1, total: doc.total, tributos: doc.tributos}}]})
     } catch (error) {
-
+      console.log(error)
     }
   } else{
     const updateMonths = ballance.months.filter(element=>{
@@ -176,9 +177,8 @@ NotaSchema.post('save', async function(doc){
       await ballance.update({
         total: ballance.total + doc.total,
         totalTributos: ballance.totalTributos + doc.tributos,
-        qtdNotas: ballance.qtdNotas + doc.tributos,
+        qtdNotas: ballance.qtdNotas + 1,
         qtdItens: ballance.qtdItens + doc.itens,
-    
         months:[{
         month: updateMonths[0].month,
         descriptions: {
