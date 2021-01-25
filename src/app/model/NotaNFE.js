@@ -132,6 +132,36 @@ const NotaSchema = new mongoose.Schema({
     default: Date.now
   },
 })
+NotaSchema.pre("remove", async function(next){
+  const dateEmissao = new Date(this.emissao) 
+  try {
+    
+  
+  const ballance = await Ballance.findOne({$and: [{user: this.user}, {year: dateEmissao.getFullYear()}]})
+  
+  const updateMonths = ballance.months.filter(element=>{
+    if(element.month == dateEmissao.getMonth())
+    return element;
+  })
+  await ballance.update({
+    total: ballance.total - this.total,
+    totalTributos: ballance.totalTributos - this.tributos,
+    qtdNotas: ballance.qtdNotas - 1,
+    qtdItens: ballance.qtdItens - this.itens,
+    months:[{
+    month: updateMonths[0].month,
+    descriptions: {
+      itens: this.itens - updateMonths[0].descriptions.itens,
+      qtdNotas: 1 - updateMonths[0].descriptions.qtdNotas,
+      total: this.total - updateMonths[0].descriptions.total,
+      tributos: this.tributos - updateMonths[0].descriptions.tributos
+    }
+  }]})
+  next()
+} catch (error) {
+  console.log(error)   
+}
+})
 NotaSchema.post('save', async function(doc){
   const dateEmissao = new Date(doc.emissao) 
   console.log('emissao->',dateEmissao, 'user', doc.user)

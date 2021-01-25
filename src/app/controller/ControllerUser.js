@@ -1,23 +1,27 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../model/User')
-const Ballance = require('../model/Ballance')
+const bcrypt = require('bcryptjs')
 
-router.post('/ballance', async(req, res)=>{
-  
-  const {user, year, months} = req.body
+router.post('/modify_password/', async (req, res)=>{
+  try {
+    const {id, oldpassword, newpassword} = req.body
+    let user = await User.findById(id).select('password')
 
-  const ballance = await Ballance.findOne({$and: [{user: user}, {year: year}]})
-  if(!ballance){
-    try {
-      const newBallance = await Ballance.create(req.body)
-      return res.send(newBallance)  
-    } catch (error) {
-      return res.status(400).send(error)
+    if (!await bcrypt.compareSync(oldpassword, user.password)){
+      return res.status(400).send({error: 'Senha atual não confere'})
+
+    }else{
+      user.password = newpassword;
+
+      console.log('-',user)
+      await user.save();
+      return res.send()
     }
+  } catch (error) {
+    console.log(error)
+    return res.status(400).send(error)
   }
-
-  return res.send(ballance)
 })
 
 router.put('/', async (req, res) => {

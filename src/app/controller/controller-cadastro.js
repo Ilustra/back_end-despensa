@@ -16,6 +16,7 @@ router.get('/:id', async (req, res) => {
     res.status(400).send(e)
   }
 })
+
 router.post('/', async (req, res) => {
   try {
     const {user} = req.body

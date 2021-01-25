@@ -20,6 +20,8 @@ app.use('/notas', isAuthorized, require('./app/controller/contrller-NotasNFE'));
 app.use('/report', require('./app/controller/controoler-reportOccurences'));
 app.use('/user', isAuthorized, require('./app/controller/ControllerUser'));
 app.use('/cadastro', isAuthorized, require('./app/controller/controller-cadastro'));
+app.use('/ballance', isAuthorized, require('./app/controller/controller-ballance'));
+app.use('/search', require('./app/controller/controller-search'));
 
 app.use(sendValidationErrors);
 
