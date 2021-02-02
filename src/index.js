@@ -14,7 +14,6 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/login', require('./app/controller/ControllerAuht'));
 app.use('/notas', isAuthorized, require('./app/controller/contrller-NotasNFE'));
 app.use('/report', require('./app/controller/controoler-reportOccurences'));
@@ -22,14 +21,12 @@ app.use('/user', isAuthorized, require('./app/controller/ControllerUser'));
 app.use('/cadastro', isAuthorized, require('./app/controller/controller-cadastro'));
 app.use('/ballance', isAuthorized, require('./app/controller/controller-ballance'));
 app.use('/search', isAuthorized, require('./app/controller/controller-search'));
-
 app.use(sendValidationErrors);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
-
   // error handler
   app.use(function (err, req, res, next) {
     // set locals, only providing error in development
