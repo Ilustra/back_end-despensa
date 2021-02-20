@@ -4,9 +4,20 @@ const mongoose = require('../../database')
 const SchemaTypes = mongoose.Schema.Types;
 
  const UserSchema = new mongoose.Schema({
-  nome:{
+  name:{
     type: String,
     require: true, 
+  },
+  first_name:{
+    type: String, 
+  },
+  last_name:{
+    type: String,
+  },
+  provider:{
+    type: String,
+    require: true,
+    default:'API-SERVICE' 
   },
   email:{
     type: String,

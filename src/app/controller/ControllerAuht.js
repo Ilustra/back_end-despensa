@@ -14,15 +14,44 @@ function generateToken(params = {}, timeout = EXPIRES) {
     expiresIn: EXPIRES,
   });
 }
+router.post('/social', async(req, res)=>{
+  try {
+    //  console.log(req.body)
+    const {name, email, provider, first_name, last_name, acess_social} =req.body
+    //console.log(logInSocial)
+    console.log(req.body)
+    const {accessToken, expirationTime, accessTokenSource} = acess_social
+    let  userSocial = await User.findOne({email})
 
+    if(!userSocial)
+        userSocial = await User.create({name, first_name, last_name, email, provider, password: accessToken })
+   
+    //console.log(userSocial)
+
+    return res.status(200).send({
+        _id: userSocial._id,
+        name: userSocial.name,
+        first_name: userSocial.first_name,
+        last_name: userSocial.last_name,
+        email: userSocial.email,
+        despensa: userSocial.despensa,
+        expirationTime,
+        provider: accessTokenSource,
+        token: accessToken,
+    })
+} catch (error) {
+    console.log(error)
+    return res.status(400).send({error:"Falha ao logogar    "})     
+}
+})
 router.post('/User', async (req, res) => {
-    const { email, nome, password } = req.body
+    const { email, name, password } = req.body
 
     try {
         if (await User.findOne({ email }))
             return res.status(400).send({ error: "Usuario com esse e-mail já está cadastrado!!" })
 
-        if (email == '' || nome == "" || password == "")
+        if (email == '' || name == "" || password == "")
             return res.status(400).send({ error: 'Não é permitidos valores em branco, preencha todos os dados corretamente!!' })
 
         let user = await User.create(req.body)
