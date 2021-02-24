@@ -18,7 +18,7 @@ router.post('/social', async(req, res)=>{
   try {
     //  console.log(req.body)
     const {name, email, provider, first_name, last_name, acess_social} =req.body
-    //console.log(logInSocial)
+    //console.log(logInSoci al)
     console.log(req.body)
     const {accessToken, expirationTime, accessTokenSource} = acess_social
     let  userSocial = await User.findOne({email})
@@ -60,6 +60,7 @@ router.post('/User', async (req, res) => {
         user.notas = undefined
 
         const now = new Date();
+    
         return res.status(200).send({
             _id: user._id,
             nome: user.nome,
@@ -76,7 +77,6 @@ router.post('/User', async (req, res) => {
 router.post('/authenticate', async (req, res) => {
 
     const { email, password } = req.body
-    console.log(req.body)
     const { 'token-timeout': timeout = EXPIRES } = req.headers;
     try {
         const user = await User.findOne({ email }).select('+password')
@@ -86,18 +86,20 @@ router.post('/authenticate', async (req, res) => {
 
         if (!await bcrypt.compareSync(password, user.password))
             return res.status(400).send({ error: 'Invalid password' })
-
+        console.log(user)
         user.password = undefined;
         user.notas = undefined;
         const now = new Date();
-        res.send({ 
-        _id: user._id,
-        nome: user.nome,
-        email: user.email,
-        token: generateToken({ id: user.id }),
-        loggedIn: now,
-        expiresIn: new Date(now.getTime() + timeout * 1000),
-        })
+        const env = { 
+            _id: user._id,
+            nome: user.nome,
+            email: user.email,
+            token: generateToken({ id: user.id }),
+            loggedIn: now,
+            expiresIn: new Date(now.getTime() + timeout * 1000),
+            }
+            console.log(env)
+        res.send(env)
     } catch (e) { 
         console.log(e)
         return res.status(400).send(e) 

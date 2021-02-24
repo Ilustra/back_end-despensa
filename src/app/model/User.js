@@ -4,7 +4,7 @@ const mongoose = require('../../database')
 const SchemaTypes = mongoose.Schema.Types;
 
  const UserSchema = new mongoose.Schema({
-  name:{
+  nome:{
     type: String,
     require: true, 
   },
