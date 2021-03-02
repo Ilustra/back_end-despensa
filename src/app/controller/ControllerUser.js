@@ -3,27 +3,25 @@ const router = express.Router()
 const User = require('../model/User')
 const bcrypt = require('bcryptjs')
 
-router.post('/modify_password/', async (req, res)=>{
+
+router.post('/register', async (req, res)=>{
   try {
-    const {id, oldpassword, newpassword} = req.body
-    let user = await User.findById(id).select('password')
-
-    if (!await bcrypt.compareSync(oldpassword, user.password)){
-      return res.status(400).send({error: 'Senha atual não confere'})
-
-    }else{
-      user.password = newpassword;
-
-      console.log('-',user)
-      await user.save();
-      return res.send()
-    }
+    console.log(req.body)
+    const {email} = req.body
+    const user = await User.findOne({email})
+    user.password = undefined
+    if(user)
+      return res.send(user);
+    
+    const new_user = await User.create(req.body)
+    new_user.password = undefined
+    return res.send(new_user);
+    
   } catch (error) {
-    console.log(error)
-    return res.status(400).send(error)
+    console.log('catc',error)
+   return res.status(400).send({error: 'Falha ao registrar'}) 
   }
 })
-
 router.put('/', async (req, res) => {
   try {
     const { nome, email, DDD, telefone, cep } = req.body

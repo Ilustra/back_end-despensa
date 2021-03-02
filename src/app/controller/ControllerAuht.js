@@ -14,36 +14,37 @@ function generateToken(params = {}, timeout = EXPIRES) {
     expiresIn: EXPIRES,
   });
 }
-router.post('/social', async(req, res)=>{
-  try {
-    //  console.log(req.body)
-    const {name, email, provider, first_name, last_name, acess_social} =req.body
-    //console.log(logInSoci al)
-    console.log(req.body)
-    const {accessToken, expirationTime, accessTokenSource} = acess_social
-    let  userSocial = await User.findOne({email})
 
-    if(!userSocial)
-        userSocial = await User.create({name, first_name, last_name, email, provider, password: accessToken })
-   
-    //console.log(userSocial)
-
-    return res.status(200).send({
-        _id: userSocial._id,
-        name: userSocial.name,
-        first_name: userSocial.first_name,
-        last_name: userSocial.last_name,
-        email: userSocial.email,
-        despensa: userSocial.despensa,
-        expirationTime,
-        provider: accessTokenSource,
-        token: accessToken,
-    })
-} catch (error) {
+//
+var admin = require('firebase-admin');
+/*
+var serviceAccount = require("../../../serviceAccountKey.json");
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+*/
+  
+router.post('/firebase', async(req, res)=>{
+// idToken comes from the client app
+const{ idToken} = req.body;
+console.log(req.body)
+admin
+  .auth()
+  .verifyIdToken(idToken)
+  .then((decodedToken) => {
+    const uid = decodedToken.uid;
+    console.log(uid)
+    console.log(decodedToken)
+    console.log(new Date(decodedToken.exp*1000) )
+    // ...
+  })
+  .catch((error) => {
+    // Handle error
     console.log(error)
-    return res.status(400).send({error:"Falha ao logogar    "})     
-}
+  }); 
+  return res.send(true)     
 })
+
 router.post('/User', async (req, res) => {
     const { email, name, password } = req.body
 
