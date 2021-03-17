@@ -5,7 +5,7 @@ const request = require('request');
 const { resolve } = require('path');
 
 var admin = require('firebase-admin');
-var serviceAccount = require("../../../serviceAccountKey.json");
+var serviceAccount = require("../../../app-mobile-ilustra-firebase-adminsdk-2qwz5-1763adfc21.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -71,7 +71,9 @@ async function onDeputareToken(url){
         .then((decodedToken) => {
           // ...
           return next();
-      })
+          //return rerro para teste
+         //return httpHelper.sendError(res, 401, { category: 'authentication', message: 'Failed to authenticate token' });
+        })
       .catch((error) => {
         // Handle error
         console.log('firebase',error)

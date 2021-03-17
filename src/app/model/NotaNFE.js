@@ -136,19 +136,22 @@ NotaSchema.pre("remove", async function(next){
   const dateEmissao = new Date(this.emissao) 
   try {
     
-  
-  const ballance = await Ballance.findOne({$and: [{user: this.user}, {year: dateEmissao.getFullYear()}]})
+  let ballance = await Ballance.findOne({$and: [{user: this.user}, {year: dateEmissao.getFullYear()}]})
   
   const updateMonths = ballance.months.filter(element=>{
     if(element.month == dateEmissao.getMonth())
     return element;
   })
+  if(updateMonths.months.length){
+    
+  }
   await ballance.update({
     total: ballance.total - this.total,
     totalTributos: ballance.totalTributos - this.tributos,
     qtdNotas: ballance.qtdNotas - 1,
     qtdItens: ballance.qtdItens - this.itens,
-    months:[{
+    months:[
+    {
     month: updateMonths[0].month,
     descriptions: {
       itens: this.itens - updateMonths[0].descriptions.itens,
@@ -156,7 +159,8 @@ NotaSchema.pre("remove", async function(next){
       total: this.total - updateMonths[0].descriptions.total,
       tributos: this.tributos - updateMonths[0].descriptions.tributos
     }
-  }]})
+    }]
+  })
   next()
 } catch (error) {
   console.log(error)   
