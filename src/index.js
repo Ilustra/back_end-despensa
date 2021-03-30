@@ -21,6 +21,7 @@ app.use('/user', isAuthorized, require('./app/controller/ControllerUser'));
 app.use('/cadastro', isAuthorized, require('./app/controller/controller-cadastro'));
 app.use('/ballance', isAuthorized, require('./app/controller/controller-ballance'));
 app.use('/search', isAuthorized, require('./app/controller/controller-search'));
+app.use('/despensa', require('./app/controller/controller-despensa'));
 app.use('/', isAuthorized, require('./app/controller/projectControllerAuth'));
 app.use(sendValidationErrors);
 

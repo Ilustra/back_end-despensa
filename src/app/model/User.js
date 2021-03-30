@@ -28,18 +28,18 @@ const SchemaTypes = mongoose.Schema.Types;
   },
   despensa:[
     {
-    id:{
-      type: mongoose.Schema.Types.ObjectId,
-      ref:'Despensa'
+      despensa: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Despensa',
+        require: true,
     },
-    padrao:{
+    name: {
+      type: String
+    },
+    isAdmin: {
       type: Boolean,
-      default: false
-    },  
-    updatedAt:{
-      type: Date,
-    },
     }
+  }
   ],
   createdAt:{
     type: Date,

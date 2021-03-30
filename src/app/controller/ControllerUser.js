@@ -49,6 +49,8 @@ router.get('/:email', async (req, res)=>{
     const user = await User.findOne({ email });
     if(!user)
       return res.status(400).send({error: 'Usuário não encontrado'})
+
+    console.log(user)
     return res.send(user)
   } catch (error) {
     return res.status(400).send(error)
