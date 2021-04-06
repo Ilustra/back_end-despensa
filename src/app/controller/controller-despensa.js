@@ -8,12 +8,8 @@ router.get('/:userId', async (req, res) => {
     const {userId} = req.params
     try {
      
-  //  const despensa = await Despensa.findOne({user: userId});
-    //const despensaShares = await Despensa.findOne({user_shareds: userId})
-    //console.log(despensaShares)
-
     const despensa = await Despensa.find({$or:[{"user": userId},{"user_shareds.user":  userId}]})
-    console.log(despensa)
+
     return res.send(despensa)   
     } catch (error) {
         console.log(error)
@@ -23,32 +19,25 @@ router.get('/:userId', async (req, res) => {
 router.post('/user', async(req, res)=>{
     const {despensaId, userId, name} = req.body
     try {
-    
     const despensa = await Despensa.findById(despensaId);
+    if(despensa.user == userId)
+    return res.status(400).send({error: 'Impossivel adicionar esse usuário!'})
         const users = despensa.user_shareds.filter(element=>{
             if(element.user == userId){
                 return element;
             }
         })
-
-        console.log(users)
         if(users.length)
             return res.status(400).send({error: 'Esse usuário já está acicionado'});
     
-   
-    despensa.user_shareds.push({user: userId, 'name': name, despensa: despensaId})
-
-
+    const  usershared = {user: userId, 'name': name, despensa: despensaId}
+    despensa.user_shareds.push(usershared)
     const user = await User.findById(userId);
-    //console.log(user)
-    const t ={
-        despensa: despensaId
-    }
-    user.despensa.push(t);
+    user.despensa.push({despensa: despensaId});
 
-   await user.update(user)
-    await despensa.save();
-    return res.send(despensa)
+        await user.update(user)
+        await despensa.save();
+    return res.send(usershared)
         
 } catch (error) {
     console.log(error)
@@ -61,8 +50,9 @@ router.delete('/user', async(req, res)=>{
     const despensa = await Despensa.findById(despensaId);
     if(despensa.user != userId)
         return res.status(400).send({error: 'Ops! apenas o proprietario pode excluir usuários!'})
-        const users = despensa.user_shareds.filter(element=>{
-            if(element._id != userId){
+
+    const users = despensa.user_shareds.filter(element=>{
+        if(element._id != userId){
                 return element;
             }
         })
@@ -102,8 +92,9 @@ router.post('/produto', async (req, res) => {
 //22209199376
 router.put('/produto', async (req,res)=>{
     const {userId,itemId, status, openDate, nivel, updatedAt, name, UN, quantidade, valor, total, validade, updateUser, categoria} = req.body
-    console.log(req.body)
+
     const despensa = await Despensa.findOne({user: userId})
+
     despensa.userUpdate = updateUser
     despensa.updatedAt = updatedAt
     despensa.items = despensa.items.map(element=>{
@@ -129,9 +120,14 @@ router.put('/produto', async (req,res)=>{
         }else
         return element;
     })
-    
+    const newItem = despensa.items.filter(element=>
+    {
+        if(element._id == itemId){
+            return element;
+        }
+    })
     await despensa.save();
-    return res.send(despensa)
+    return res.send(newItem.pop())
 
 })
 router.delete('/produto', async (req, res) => {
@@ -153,5 +149,21 @@ router.delete('/produto', async (req, res) => {
         return res.status(400).send(error)
     }
 })
+//lista exercicio repetição 4-9 12,14 16 
+router.delete('/:_id/:userId', async (req, res) => {
+    try {
+        const{_id, userId} = req.params
 
+        const despensa = await Despensa.findById(_id)
+
+        if(despensa.user != userId)
+        return res.status(400).send({error: 'Ops, apenas o proprietário pode deleter a despensa'})
+        await despensa.delete();
+        return res.send()
+
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send(error)
+    }
+})
 module.exports = router;
