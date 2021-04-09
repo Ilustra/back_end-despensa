@@ -39,7 +39,7 @@ async function onDeputareToken(url){
   const isAuthorized  = async (req, res, next) => {
 
     const { authorization, provider } = req.headers;
-    
+      console.log('provider', provider)
     if (!authorization) {
       return httpHelper.sendError(res, 403, { category: 'authentication', message: 'No authentication token' });
     }

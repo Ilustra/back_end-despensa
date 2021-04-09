@@ -44,15 +44,18 @@ router.post('/user', async(req, res)=>{
     return res.status(400).send({error: 'Ops'})       
 }
 })
-router.delete('/user', async(req, res)=>{
-    const {despensaId, userId} = req.body
-    
-    const despensa = await Despensa.findById(despensaId);
-    if(despensa.user != userId)
-        return res.status(400).send({error: 'Ops! apenas o proprietario pode excluir usuários!'})
+router.delete('/user/:_id/:userId', async(req, res)=>{
+
+    const {_id, userId} = req.params
+
+    const despensa = await Despensa.findById(_id);
+  
+    if(!despensa)
+    return res.status(400).send({error: 'Ops! despensa não encontrada, tente novamente!'})
+
 
     const users = despensa.user_shareds.filter(element=>{
-        if(element._id != userId){
+        if(element.user != userId){
                 return element;
             }
         })
@@ -60,7 +63,7 @@ router.delete('/user', async(req, res)=>{
     despensa.user_shareds = users
     await despensa.save();
     
-    return res.send(despensa)
+    return res.send()
 })
 router.post('/create', async (req, res) => {
     try {
@@ -77,6 +80,7 @@ router.post('/produto', async (req, res) => {
         const despensa = await Despensa.findById(despensaId)
         despensa.userUpdate = userName
         despensa.updatedAt = dateUpdate
+
         await items.forEach(element => {
             despensa.items.push(element);    
         });
@@ -130,11 +134,11 @@ router.put('/produto', async (req,res)=>{
     return res.send(newItem.pop())
 
 })
-router.delete('/produto', async (req, res) => {
+router.delete('/produto/:despensaId/:itemId/:userId', async (req, res) => {
     try {
-        const{user, itemId} = req.body
+        const{despensaId, itemId, userId} = req.params
 
-        let despensa = await Despensa.findOne({user})
+        let despensa = await Despensa.findById(despensaId)
         const newItems = despensa.items.filter(element=>{
             if(element._id != itemId){
                 return element
