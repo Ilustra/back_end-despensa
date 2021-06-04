@@ -8,10 +8,14 @@ router.post('/register', async (req, res)=>{
   try {
     console.log(req.body)
     const {email} = req.body
+
     const user = await User.findOne({email})
-    user.password = undefined
-    if(user)
+
+    if(user){
+      user.password = undefined
       return res.send(user);
+    }
+
     
     const new_user = await User.create(req.body)
     new_user.password = undefined
