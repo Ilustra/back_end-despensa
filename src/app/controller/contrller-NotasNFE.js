@@ -221,8 +221,8 @@ router.post('/register', async (req, res) => {
                     if(notaFiscal)
                     return res.status(400).send({ error: 'Essa nota já foi adicionada' })
     
-                    const notas = await NotaNfe.create(scrapingNota)
-                    return res.send(notas)
+                    //const notas = await NotaNfe.create(scrapingNota)
+                    return res.send(scrapingNota)
                     
                     }catch(e){
                         console.log('1', e)
@@ -236,7 +236,6 @@ router.post('/register', async (req, res) => {
         })
 
     } catch (e) {
-        console.log('----',e)
         return res.status(400).send(e)
     }
 })

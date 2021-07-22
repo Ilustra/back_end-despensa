@@ -30,6 +30,9 @@ const SchemaDespensa = new mongoose.Schema({
             name: {
                 type: String,
                 require: true,
+            },
+            photoURL: {
+                type: String,
             }
         }
     ],
