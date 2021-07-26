@@ -22,9 +22,9 @@ app.use('/cadastro', isAuthorized, require('./app/controller/controller-cadastro
 app.use('/ballance', isAuthorized, require('./app/controller/controller-ballance'));
 app.use('/search', isAuthorized, require('./app/controller/controller-search'));
 app.use('/despensa', isAuthorized, require('./app/controller/controller-despensa'));
-app.use('/operation',  require('./app/controller/controller-operation'));
-app.use('/conta',  require('./app/controller/controller-conta'));
-app.use('/', isAuthorized, require('./app/controller/projectControllerAuth'));
+app.use('/operation',isAuthorized,  require('./app/controller/controller-operation'));
+app.use('/conta',  isAuthorized, require('./app/controller/controller-conta'));
+app.use('/',  require('./app/controller/projectControllerAuth'));
 app.use(sendValidationErrors);
 
 // catch 404 and forward to error handler

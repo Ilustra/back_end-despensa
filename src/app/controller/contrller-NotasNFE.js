@@ -219,10 +219,10 @@ router.post('/register', async (req, res) => {
                     const notaFiscal = await NotaNfe.findOne({ url: url })
     
                     if(notaFiscal)
-                    return res.status(400).send({ error: 'Essa nota já foi adicionada' })
+                    return res.send(notaFiscal)
     
-                    //const notas = await NotaNfe.create(scrapingNota)
-                    return res.send(scrapingNota)
+                    const notas = await NotaNfe.create(scrapingNota)
+                    return res.send(notas)
                     
                     }catch(e){
                         console.log('1', e)

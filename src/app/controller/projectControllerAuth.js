@@ -6,9 +6,8 @@ const router = express.Router()
 
 //router.use(authMiddleware)
 
-router.get('/', (req, res)=> {
-   console.log('4')
-   return res.send({status: true, UsuarioId: req.userId})
+router.get('/app-ads.txt', (req, res)=> {
+   return res.send('google.com, pub-7017548991231781, DIRECT, f08c47fec0942fa0')
 })
 
 module.exports = router;
